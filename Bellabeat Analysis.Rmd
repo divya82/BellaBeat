@@ -1,0 +1,151 @@
+
+# BellaBeat
+
+## About the Company
+
+Bellabeat, a high-tech manufacturer of health-focused products for women. Bellabeat is a successful small company, but they have the potential to become a larger player in the global smart device market.Urška Sršen, cofounder and Chief Creative Officer of Bellabeat, believes that analyzing smart device fitness data could help unlock new growth opportunities for the company.
+
+## Questions for the analysis
+* What are some trends in smart device usage?
+* How could these trends apply to Bellabeat customers?
+* How could these trends help influence Bellabeat marketing strategy
+
+## Business task
+Identify potential opportunities for growth and recommendations for the Bellabeat marketing strategy improvement based on trends in smart device usage.
+
+# Loading packages
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(scales)
+```
+
+
+# Importing Data
+```{r}
+daily_activity <- read_csv("C:/Users/visha/OneDrive/Documents/Bellabeat/Fitabase Data 4.12.16-5.12.16/dailyActivity_merged.csv")
+daily_Calories <- read_csv("C:/Users/visha/OneDrive/Documents/Bellabeat/Fitabase Data 4.12.16-5.12.16/dailyCalories_merged.csv")
+daily_Intensities <-read_csv("C:/Users/visha/OneDrive/Documents/Bellabeat/Fitabase Data 4.12.16-5.12.16/dailyIntensities_merged.csv")
+daily_Steps <- read_csv("C:/Users/visha/OneDrive/Documents/Bellabeat/Fitabase Data 4.12.16-5.12.16/dailySteps_merged.csv")
+heartrate_sec <- read_csv("C:/Users/visha/OneDrive/Documents/Bellabeat/Fitabase Data 4.12.16-5.12.16/heartrate_seconds_merged.csv")
+sleep_Day <- read_csv("C:/Users/visha/OneDrive/Documents/Bellabeat/Fitabase Data 4.12.16-5.12.16/sleepDay_merged.csv")
+weightLogInfo <- read_csv("C:/Users/visha/OneDrive/Documents/Bellabeat/Fitabase Data 4.12.16-5.12.16/weightLogInfo_merged.csv")
+
+```
+
+# Data Cleaning and Processing
+
+## Joining Data
+```{r}
+Calories_Activity <-inner_join(daily_activity,daily_Calories,
+c("Id","Calories"))
+
+daily <- inner_join(Calories_Activity,daily_Intensities,
+c("Id","ActivityDay","SedentaryMinutes","LightlyActiveMinutes",
+"FairlyActiveMinutes","VeryActiveMinutes","SedentaryActiveDistance", "LightActiveDistance", "ModeratelyActiveDistance", "VeryActiveDistance"))
+
+daily_data <- inner_join(daily,sleep_Day,c("Id")) %>% drop_na() 
+```
+
+## Exploring Data
+
+After joining the data finding co-relation between the activitness and user type.
+
+```{r}
+#In order to better visualize the data I will group the user into four categories based on for each of their activity level.
+
+User_type <- daily_data %>% summarise(Users = factor(case_when(
+SedentaryMinutes > mean(SedentaryMinutes) & 
+FairlyActiveMinutes < mean(FairlyActiveMinutes) &
+LightlyActiveMinutes < mean(LightlyActiveMinutes) & 
+VeryActiveMinutes < mean(VeryActiveMinutes) ~ "Sedentary",
+  
+SedentaryMinutes < mean(SedentaryMinutes) & 
+FairlyActiveMinutes < mean(FairlyActiveMinutes) &
+LightlyActiveMinutes > mean(LightlyActiveMinutes) & 
+VeryActiveMinutes < mean(VeryActiveMinutes) ~ "Lightly Active",
+  
+SedentaryMinutes < mean(SedentaryMinutes) & 
+FairlyActiveMinutes > mean(FairlyActiveMinutes) &
+LightlyActiveMinutes < mean(LightlyActiveMinutes) & 
+VeryActiveMinutes < mean(VeryActiveMinutes) ~ "Fairly Active",
+  
+SedentaryMinutes < mean(SedentaryMinutes) & 
+FairlyActiveMinutes < mean(FairlyActiveMinutes) & 
+LightlyActiveMinutes < mean(LightlyActiveMinutes) & 
+VeryActiveMinutes > mean(VeryActiveMinutes) ~ "Very Active"),
+
+levels= c("Sedentary","Lightly Active","Fairly Active","Very Active")),
+Calories, Id= Id) %>% drop_na()
+
+User_type %>% select(Users,Calories) %>% group_by(Users) %>% 
+summarise(Calories_total = sum(Calories))
+```
+
+Analyzing the sleep patterns
+
+```{r}
+sleep_type <- daily_data %>% summarise(sleep = factor(case_when(
+TotalMinutesAsleep <= 360 ~ "Bad Sleep",
+TotalMinutesAsleep > 360 & TotalMinutesAsleep <= 480 ~ "Normal Sleep",
+TotalMinutesAsleep > 480 ~ "Over Sleep"),
+levels=c("Bad Sleep","Over Sleep","Normal Sleep")), 
+sleep_time = TotalMinutesAsleep,Id= Id)
+
+head(sleep_type)
+```
+
+## Joining Analysed Data
+
+```{r include=FALSE}
+User_sleep_type <- inner_join(User_type,sleep_type,c("Id")) 
+User_type_weight <- inner_join(User_type,weightLogInfo,c("Id"))
+User_step_weight <- inner_join(daily_Steps,User_type_weight,c("Id"))
+```
+
+## Analysing the Data
+
+Finding the relation between the Number of steps and Weight
+
+```{r}
+User_step_weight <- User_step_weight %>% 
+select(Users,StepTotal,WeightKg) %>% group_by(Users) %>% 
+summarise(Mean_Step = round(mean(StepTotal),0),
+Mean_Weight=round(mean(WeightKg),0))
+
+head(User_step_weight)
+```
+
+
+Coorelating the Calories percentage for different sleep types
+```{r}
+User_Analysis <- User_sleep_type %>% select_all() %>% 
+group_by(Users,sleep) %>% summarise(Total_Calories = sum(Calories)) %>% 
+mutate(Percentage_Calories= percent(Total_Calories/sum(Total_Calories)))
+
+head(User_Analysis)
+```
+
+```{r}
+User_Analysis_1 <- User_sleep_type %>% select(Users,Calories) %>% 
+  group_by(Users) %>% summarise(Total_Calories = quantile(Calories,prob=c(0.2,0.5,0.8)))
+
+User_Analysis_1
+```
+
+
+# Visualization
+```{r}
+ggplot(data=User_Analysis) + aes(x= Users,y= Percentage_Calories, 
+fill = sleep)+geom_bar(stat = "identity" ,position= "dodge")+ 
+theme(axis.text.y = element_text(angle= 45),legend.position="bottom")+ labs(title="Different users and their sleep cycle")
+```
+
+```{r}
+ggplot(data=User_Analysis_1) + 
+geom_boxplot(aes(x= Users,y= Total_Calories, fill=Users))+ 
+labs(title="Calories burned by different Users")
+```
+
+

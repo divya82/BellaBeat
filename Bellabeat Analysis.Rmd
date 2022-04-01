@@ -24,13 +24,13 @@ library(scales)
 
 # Importing Data
 ```{r}
-daily_activity <- read_csv("C:/Users/visha/OneDrive/Documents/Bellabeat/Fitabase Data 4.12.16-5.12.16/dailyActivity_merged.csv")
-daily_Calories <- read_csv("C:/Users/visha/OneDrive/Documents/Bellabeat/Fitabase Data 4.12.16-5.12.16/dailyCalories_merged.csv")
-daily_Intensities <-read_csv("C:/Users/visha/OneDrive/Documents/Bellabeat/Fitabase Data 4.12.16-5.12.16/dailyIntensities_merged.csv")
-daily_Steps <- read_csv("C:/Users/visha/OneDrive/Documents/Bellabeat/Fitabase Data 4.12.16-5.12.16/dailySteps_merged.csv")
-heartrate_sec <- read_csv("C:/Users/visha/OneDrive/Documents/Bellabeat/Fitabase Data 4.12.16-5.12.16/heartrate_seconds_merged.csv")
-sleep_Day <- read_csv("C:/Users/visha/OneDrive/Documents/Bellabeat/Fitabase Data 4.12.16-5.12.16/sleepDay_merged.csv")
-weightLogInfo <- read_csv("C:/Users/visha/OneDrive/Documents/Bellabeat/Fitabase Data 4.12.16-5.12.16/weightLogInfo_merged.csv")
+daily_activity <- read_csv("OneDrive/Documents/Bellabeat/Fitabase Data 4.12.16-5.12.16/dailyActivity_merged.csv")
+daily_Calories <- read_csv("OneDrive/Documents/Bellabeat/Fitabase Data 4.12.16-5.12.16/dailyCalories_merged.csv")
+daily_Intensities <-read_csv("OneDrive/Documents/Bellabeat/Fitabase Data 4.12.16-5.12.16/dailyIntensities_merged.csv")
+daily_Steps <- read_csv("OneDrive/Documents/Bellabeat/Fitabase Data 4.12.16-5.12.16/dailySteps_merged.csv")
+heartrate_sec <- read_csv("OneDrive/Documents/Bellabeat/Fitabase Data 4.12.16-5.12.16/heartrate_seconds_merged.csv")
+sleep_Day <- read_csv("OneDrive/Documents/Bellabeat/Fitabase Data 4.12.16-5.12.16/sleepDay_merged.csv")
+weightLogInfo <- read_csv("OneDrive/Documents/Bellabeat/Fitabase Data 4.12.16-5.12.16/weightLogInfo_merged.csv")
 
 ```
 
